@@ -4,12 +4,10 @@ export PLATFORM_ID="RUNPOD"
 
 configure_dns() {
     echo "Configuring DNS settings..."
-    # Backup the current resolv.conf
-    cp /etc/resolv.conf /etc/resolv.conf.backup
-    # Use Google's public DNS servers
+    cp /etc/resolv.conf /etc/resolv.conf.backup 2>/dev/null || true
     echo "nameserver 8.8.8.8
-nameserver 8.8.4.4" >/etc/resolv.conf
-    echo "DNS configuration updated."
+nameserver 8.8.4.4" > /etc/resolv.conf 2>/dev/null || echo "Could not modify DNS, continuing..."
+    echo "DNS configuration completed."
 }
 
 # Start jupyter lab
@@ -38,12 +36,15 @@ start_jupyter() {
 # Export env vars
 export_env_vars() {
     echo "Exporting environment variables..."
-    printenv | grep -E '^RUNPOD_|^PATH=|^_=' | awk -F = '{ print "export " $1 "=\"" $2 "\"" }' >>/etc/rp_environment
-    echo 'source /etc/rp_environment' >>~/.bashrc
+    printenv | grep -E '^RUNPOD_|^PATH=|^_=' | awk -F = '{ print "export " $1 "=\"" $2 "\"" }' >>/etc/rp_environment 2>/dev/null || true
+    echo 'source /etc/rp_environment' >>~/.bashrc 2>/dev/null || true
+    echo "Environment variables exported."
 }
 
 make_directory() {
-    mkdir -p /notebooks/my-runpod-volume/models/{checkpoints,vae,text-encoder,gfpgan,embeddings,hypernetwork,esrgan,clip,controlnet,loras}
+    echo "Creating model directories..."
+    mkdir -p /notebooks/my-runpod-volume/models/{checkpoints,vae,text-encoder,gfpgan,embeddings,hypernetwork,esrgan,clip,controlnet,loras} || true
+    echo "Directories created."
 }
 
 update_webui_forge() {
@@ -74,13 +75,15 @@ run_workspace_setup() {
     fi
 }
 
-echo "Pod Started"
-configure_dns
-export_env_vars
-make_directory
+echo "=== Pod Starting ==="
+echo "Platform: $PLATFORM_ID"
+echo "Branch: $BRANCH_ID"
+configure_dns || echo "DNS config failed, continuing..."
+export_env_vars || echo "Env vars export failed, continuing..."
+make_directory || echo "Directory creation failed, continuing..."
 # update_webui_forge  # Commented out - Forge is already included in Docker image
-start_forge_webui
-start_jupyter
-run_workspace_setup
-echo "Start script(s) finished, pod is ready to use."
+start_forge_webui || echo "Forge startup failed!"
+start_jupyter || echo "Jupyter startup failed!"
+run_workspace_setup || echo "Workspace setup failed, continuing..."
+echo "=== Start script finished, pod is ready ==="
 sleep infinity
