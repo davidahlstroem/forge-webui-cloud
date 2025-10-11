@@ -2,11 +2,6 @@
 export BRANCH_ID=${BRANCH_ID:-main}
 export PLATFORM_ID="RUNPOD"
 
-start_nginx() {
-    echo "Start NGINX"
-    service nginx start
-}
-
 configure_dns() {
     echo "Configuring DNS settings..."
     # Backup the current resolv.conf
@@ -20,23 +15,23 @@ nameserver 8.8.4.4" >/etc/resolv.conf
 # Start jupyter lab
 start_jupyter() {
     echo "Starting Jupyter Lab..."
-    cd /notebooks/ &&
-        nohup jupyter lab \
-            --allow-root \
-            --ip=0.0.0.0 \
-            --no-browser \
-            --ServerApp.trust_xheaders=True \
-            --ServerApp.disable_check_xsrf=False \
-            --ServerApp.allow_remote_access=True \
-            --ServerApp.allow_origin='*' \
-            --ServerApp.allow_credentials=True \
-            --FileContentsManager.delete_to_trash=False \
-            --FileContentsManager.always_delete_dir=True \
-            --FileContentsManager.preferred_dir=/notebooks \
-            --ContentsManager.allow_hidden=True \
-            --LabServerApp.copy_absolute_path=True \
-            --ServerApp.token='' \
-            --ServerApp.password='' &>./jupyter.log &
+    cd /notebooks/
+    jupyter lab \
+        --allow-root \
+        --ip=0.0.0.0 \
+        --no-browser \
+        --ServerApp.trust_xheaders=True \
+        --ServerApp.disable_check_xsrf=False \
+        --ServerApp.allow_remote_access=True \
+        --ServerApp.allow_origin='*' \
+        --ServerApp.allow_credentials=True \
+        --FileContentsManager.delete_to_trash=False \
+        --FileContentsManager.always_delete_dir=True \
+        --FileContentsManager.preferred_dir=/notebooks \
+        --ContentsManager.allow_hidden=True \
+        --LabServerApp.copy_absolute_path=True \
+        --ServerApp.token='' \
+        --ServerApp.password='' &>./jupyter.log &
     echo "Jupyter Lab started"
 }
 
@@ -58,12 +53,13 @@ update_webui_forge() {
     echo "WebUI Forge updated"
 }
 
-# start_forge_webui() {
-#     echo "Starting Forge WebUI..."
-#     cd /notebooks/stable-diffusion-webui-forge
-#     nohup python launch.py --listen --port 7860 --api --skip-torch-cuda-test --xformers &>/notebooks/forge.log &
-#     echo "Forge WebUI started"
-# }
+start_forge_webui() {
+    echo "Starting Forge WebUI..."
+    echo "This may take 5-10 minutes on first startup..."
+    cd /notebooks/stable-diffusion-webui-forge
+    python3 launch.py --listen --port 7860 --api --skip-torch-cuda-test --xformers &>/notebooks/forge.log &
+    echo "Forge WebUI started (initializing in background, check forge.log for progress)"
+}
 
 run_workspace_setup() {
     if [ -f "/workspace/setup.sh" ]; then
@@ -80,10 +76,9 @@ run_workspace_setup() {
 
 echo "Pod Started"
 configure_dns
-start_nginx
 export_env_vars
 make_directory
-update_webui_forge
+# update_webui_forge  # Commented out - Forge is already included in Docker image
 start_forge_webui
 start_jupyter
 run_workspace_setup

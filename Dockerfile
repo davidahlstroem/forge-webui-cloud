@@ -19,7 +19,7 @@ RUN mkdir -p /notebooks
 # Install Python, git and other necessary tools
 RUN ln -snf /usr/share/zoneinfo/$CONTAINER_TIMEZONE /etc/localtime && echo $CONTAINER_TIMEZONE > /etc/timezone
 RUN apt-get update --yes && \
-    apt-get install --yes --no-install-recommends build-essential aria2 git git-lfs curl wget gcc g++ bash libgl1 software-properties-common nginx && \
+    apt-get install --yes --no-install-recommends build-essential aria2 git git-lfs curl wget gcc g++ bash libgl1 software-properties-common && \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update --yes && \
     apt-get install --yes --no-install-recommends "python${PYTHON_VERSION}" "python${PYTHON_VERSION}-dev" "python${PYTHON_VERSION}-venv" "python${PYTHON_VERSION}-tk" && \
@@ -38,12 +38,8 @@ RUN ln -s /usr/bin/python${PYTHON_VERSION} /usr/bin/python && \
 # Clean up to reduce image size
 RUN apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-# Copy reverse proxy config
-COPY src/forge_nginx_conf.conf /etc/nginx/sites-available/
-RUN ln -s /etc/nginx/sites-available/forge_nginx_conf.conf /etc/nginx/sites-enabled/
-
-# Install Torch
-RUN pip install --no-cache-dir torch==2.4.1 torchvision==0.19.1 torchaudio==2.4.1 --index-url https://download.pytorch.org/whl/cu124
+# Install Torch 
+RUN pip install --no-cache-dir torch==2.4.1 torchvision==0.19.1 --index-url https://download.pytorch.org/whl/cu124
 
 # Install xformers
 RUN pip install --no-cache-dir xformers==0.0.28.post1 --index-url https://download.pytorch.org/whl/cu124
@@ -61,11 +57,11 @@ COPY src/ ./src/
 
 RUN chmod +x start.sh
 
+# Git Clone Forge WebUI (shallow clone to reduce size)
+RUN git clone --depth 1 https://github.com/lllyasviel/stable-diffusion-webui-forge.git
+
 # Install WebUI Forge Dependencies
-RUN pip install --no-cache-dir -r https://raw.githubusercontent.com/lllyasviel/stable-diffusion-webui-forge/refs/heads/main/requirements_versions.txt
+RUN pip install --no-cache-dir -r /notebooks/stable-diffusion-webui-forge/requirements_versions.txt
 
-# Git Clone 
-RUN git clone https://github.com/lllyasviel/stable-diffusion-webui-forge.git
-
-EXPOSE 3001 7860 8888
+EXPOSE 7860 8888
 CMD ["/bin/bash", "/notebooks/start.sh"]
