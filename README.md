@@ -1,8 +1,8 @@
 # Stable Diffusion WebUI Forge - GPU Cloud Docker
 
-Docker image for **Stable Diffusion WebUI Forge** optimized for GPU cloud platforms with automatic workspace setup.
+Docker image for **Stable Diffusion WebUI Forge** for GPU cloud platforms with automatic workspace setup.
 
-**Docker Hub:** `<your-username>/forge-webui-cloud:latest`
+**Docker Hub:** `davidahlstroem/forge-webui-cloud:latest`
 
 The container automatically starts all services when deployed to GPU cloud platforms
 
@@ -16,7 +16,7 @@ The container automatically starts all services when deployed to GPU cloud platf
 
 ## ⚙️ Automatic Setup Script
 
-Place your setup script at `/workspace/setup.sh` and it runs automatically after all services start.
+Place your setup script at `/workspace/setup.sh` and it runs after all services start.
 
 **Example `/workspace/setup.sh`:**
 ```bash
@@ -38,5 +38,5 @@ cp /workspace/*.safetensors /notebooks/stable-diffusion-webui-forge/models/Stabl
 
 ---
 
-**Image:** `<your-username>/forge-webui-cloud:latest`  
+**Image:** `davidahlstroem/forge-webui-cloud:latest`  
 **Auto-publishes:** Every push to main branch via GitHub Actions

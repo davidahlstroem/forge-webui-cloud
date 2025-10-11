@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.4.1-base-ubuntu20.04 as base
+FROM nvidia/cuda:12.4.1-base-ubuntu22.04 AS base
 
 # Set Python Version
 ARG PYTHON_VERSION="3.10"
@@ -19,7 +19,7 @@ RUN mkdir -p /notebooks
 # Install Python, git and other necessary tools
 RUN ln -snf /usr/share/zoneinfo/$CONTAINER_TIMEZONE /etc/localtime && echo $CONTAINER_TIMEZONE > /etc/timezone
 RUN apt-get update --yes && \
-    apt-get install --yes --no-install-recommends build-essential aria2 git git-lfs curl wget gcc g++ bash libgl1 software-properties-common nginx&& \
+    apt-get install --yes --no-install-recommends build-essential aria2 git git-lfs curl wget gcc g++ bash libgl1 software-properties-common nginx && \
     add-apt-repository ppa:deadsnakes/ppa && \
     apt-get update --yes && \
     apt-get install --yes --no-install-recommends "python${PYTHON_VERSION}" "python${PYTHON_VERSION}-dev" "python${PYTHON_VERSION}-venv" "python${PYTHON_VERSION}-tk" && \

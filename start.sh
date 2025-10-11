@@ -51,9 +51,19 @@ make_directory() {
     mkdir -p /notebooks/my-runpod-volume/models/{checkpoints,vae,text-encoder,gfpgan,embeddings,hypernetwork,esrgan,clip,controlnet,loras}
 }
 
-run_custom_script() {
-    curl https://raw.githubusercontent.com/vjumpkung/vjump-runpod-notebooks-and-script/refs/heads/$BRANCH_ID/webui-forge/custom_scripts_forge.sh -sSf | bash -s -- -y
+update_webui_forge() {
+    echo "Updating WebUI Forge"
+    cd /notebooks/stable-diffusion-webui-forge && git pull --ff-only
+    export TORCH_FORCE_WEIGHTS_ONLY_LOAD=1
+    echo "WebUI Forge updated"
 }
+
+# start_forge_webui() {
+#     echo "Starting Forge WebUI..."
+#     cd /notebooks/stable-diffusion-webui-forge
+#     nohup python launch.py --listen --port 7860 --api --skip-torch-cuda-test --xformers &>/notebooks/forge.log &
+#     echo "Forge WebUI started"
+# }
 
 run_workspace_setup() {
     if [ -f "/workspace/setup.sh" ]; then
@@ -73,7 +83,8 @@ configure_dns
 start_nginx
 export_env_vars
 make_directory
-run_custom_script
+update_webui_forge
+start_forge_webui
 start_jupyter
 run_workspace_setup
 echo "Start script(s) finished, pod is ready to use."
