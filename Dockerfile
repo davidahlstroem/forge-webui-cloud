@@ -36,11 +36,10 @@ RUN pip install --no-cache-dir jupyterlab jupyter-archive nbformat \
     requests python-dotenv nvitop gdown && \
     pip cache purge
 
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
 WORKDIR /workspace/
 
-COPY start.sh .
-
-RUN chmod +x start.sh
-
 EXPOSE 7860 8888
-CMD ["/bin/bash", "/workspace/start.sh"]
+CMD ["/bin/bash", "/start.sh"]
