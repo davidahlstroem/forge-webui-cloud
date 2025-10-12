@@ -1,42 +1,114 @@
 # Stable Diffusion WebUI Forge - GPU Cloud Docker
 
-Docker image for **Stable Diffusion WebUI Forge** for GPU cloud platforms with automatic workspace setup.
+Docker image for **Stable Diffusion WebUI Forge** optimized for GPU cloud platforms (RunPod, Vast.ai) with network volume support.
 
 **Docker Hub:** `davidahlstroem/forge-webui-cloud:latest`
 
 The container automatically starts all services when deployed to GPU cloud platforms
 
-## 📦 What's Included
+## What's Included
 
-- **CUDA 12.4.1** + PyTorch 2.4.1 + xFormers
-- **Stable Diffusion WebUI Forge** (cloned fresh on build)
-- **Jupyter Lab** on port 8888
-- **NGINX** reverse proxy on port 3001
-- **Automatic workspace setup** integration
+- **CUDA 12.4.1** base (Ubuntu 22.04)
+- **Python 3.10** with pip
+- **PyTorch 2.4.1** + torchvision (CUDA 12.4 optimized)
+- **xFormers 0.0.28** for memory efficiency
+- **Jupyter Lab** with extensions
+- **Git, curl, wget** and build tools
 
-## ⚙️ Automatic Setup Script
+## How It Works
 
-Place your setup script at `/workspace/setup.sh` and it runs after all services start.
+### First Run (~10-15 minutes)
+- Installs **Stable Diffusion WebUI Forge** to `/workspace/stable-diffusion-webui-forge`
+- Installs all Forge dependencies
+- Creates model directories in `/workspace/models/`
+- Starts Forge WebUI on port 7860 (with API enabled)
+- Starts Jupyter Lab on port 8888
+
+### Subsequent Runs (~2-3 minutes)
+- Detects existing Forge installation in `/workspace/`
+- Optionally updates via `git pull`
+- Starts services immediately
+
+## Directory Structure
+
+```
+/workspace/                                    # Network volume (persistent)
+├── stable-diffusion-webui-forge/            # Forge WebUI installation
+├── models/                                   # Model storage
+│   ├── checkpoints/
+│   ├── loras/
+│   ├── vae/
+│   └── ...
+└── setup.sh                                  # Optional custom setup script
+
+/notebooks/                                   # Container storage
+├── forge.log                                # Forge startup logs
+├── jupyter.log                              # Jupyter logs
+└── start.sh                                 # Main startup script
+```
+
+## Custom Setup Script
+
+Place your setup script at `/workspace/setup.sh` and it runs automatically after all services start.
 
 **Example `/workspace/setup.sh`:**
 ```bash
 #!/bin/bash
 set -e
 
-# Clone your automation repo
-git clone https://github.com/your-username/your-project.git
+# Download a model
+cd /workspace/models/checkpoints
+wget https://example.com/model.safetensors
 
-# Copy model files
-cp /workspace/*.safetensors /notebooks/stable-diffusion-webui-forge/models/Stable-diffusion/
+# Clone extensions
+cd /workspace/stable-diffusion-webui-forge/extensions
+git clone https://github.com/your-username/your-extension.git
+
+echo "Custom setup complete!"
 ```
 
+## Exposed Ports
 
-## 📝 Environment Variables
+- **7860** - Stable Diffusion WebUI Forge (web interface + API)
+- **8888** - Jupyter Lab (no authentication)
+
+## Environment Variables
 
 - `BRANCH_ID` - Custom script branch (default: `main`)
 - `PLATFORM_ID` - Platform identifier (default: `RUNPOD`)
 
----
+## Troubleshooting
 
-**Image:** `davidahlstroem/forge-webui-cloud:latest`  
-**Auto-publishes:** Every push to main branch via GitHub Actions
+### Check Logs
+```bash
+# In terminal or Jupyter
+cat /notebooks/forge.log        # Forge startup/runtime logs
+cat /notebooks/jupyter.log      # Jupyter logs
+```
+
+### First Startup Taking Long?
+- First run installs Forge (~5-10 min for dependencies)
+- Compiling CUDA kernels on first GPU use (~2-3 min)
+- Subsequent starts are much faster with network volume
+
+### Container Crashes?
+- Ensure `/workspace` is mounted (network volume)
+- Check disk space (need 30-50GB minimum)
+- GPU must support CUDA 12.4
+
+### Forge Won't Start?
+- Check `/notebooks/forge.log` for errors
+- Verify GPU is detected: `nvidia-smi`
+- Try accessing Jupyter (port 8888) first to debug
+
+
+## Technical Details
+
+**Base Image:** `nvidia/cuda:12.4.1-base-ubuntu22.04`  
+**Image Size:** ~3.5GB (compressed)  
+**Forge Install:** Runtime (first boot only)  
+**Auto-publishes:** Every push to master branch via GitHub Actions
+
+
+**Repository:** [github.com/davidahlstroem/forge-webui-cloud](https://github.com/davidahlstroem/forge-webui-cloud)  
+**Docker Hub:** [hub.docker.com/r/davidahlstroem/forge-webui-cloud](https://hub.docker.com/r/davidahlstroem/forge-webui-cloud)

@@ -57,11 +57,5 @@ COPY src/ ./src/
 
 RUN chmod +x start.sh
 
-# Git Clone Forge WebUI (shallow clone to reduce size)
-RUN git clone --depth 1 https://github.com/lllyasviel/stable-diffusion-webui-forge.git
-
-# Install WebUI Forge Dependencies
-RUN pip install --no-cache-dir -r /notebooks/stable-diffusion-webui-forge/requirements_versions.txt
-
 EXPOSE 7860 8888
 CMD ["/bin/bash", "/notebooks/start.sh"]

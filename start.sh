@@ -43,21 +43,36 @@ export_env_vars() {
 
 make_directory() {
     echo "Creating model directories..."
-    mkdir -p /notebooks/my-runpod-volume/models/{checkpoints,vae,text-encoder,gfpgan,embeddings,hypernetwork,esrgan,clip,controlnet,loras} || true
+    mkdir -p /workspace/models/{checkpoints,vae,text-encoder,gfpgan,embeddings,hypernetwork,esrgan,clip,controlnet,loras} || true
     echo "Directories created."
 }
 
+install_forge_webui() {
+    if [ ! -d "/workspace/stable-diffusion-webui-forge" ]; then
+        echo "Forge WebUI not found, installing to /workspace..."
+        cd /workspace
+        git clone --depth 1 https://github.com/lllyasviel/stable-diffusion-webui-forge.git
+        cd stable-diffusion-webui-forge
+        pip install --no-cache-dir -r requirements_versions.txt
+        echo "Forge WebUI installed successfully"
+    else
+        echo "Forge WebUI already installed at /workspace/stable-diffusion-webui-forge"
+    fi
+}
+
 update_webui_forge() {
-    echo "Updating WebUI Forge"
-    cd /notebooks/stable-diffusion-webui-forge && git pull --ff-only
+    echo "Checking for WebUI Forge updates..."
+    if [ -d "/workspace/stable-diffusion-webui-forge" ]; then
+        cd /workspace/stable-diffusion-webui-forge && git pull --ff-only || echo "Git pull failed, continuing..."
+    fi
     export TORCH_FORCE_WEIGHTS_ONLY_LOAD=1
-    echo "WebUI Forge updated"
+    echo "WebUI Forge update check completed"
 }
 
 start_forge_webui() {
     echo "Starting Forge WebUI..."
     echo "This may take 5-10 minutes on first startup..."
-    cd /notebooks/stable-diffusion-webui-forge
+    cd /workspace/stable-diffusion-webui-forge
     python3 launch.py --listen --port 7860 --api --skip-torch-cuda-test --xformers &>/notebooks/forge.log &
     echo "Forge WebUI started (initializing in background, check forge.log for progress)"
 }
@@ -81,7 +96,8 @@ echo "Branch: $BRANCH_ID"
 configure_dns || echo "DNS config failed, continuing..."
 export_env_vars || echo "Env vars export failed, continuing..."
 make_directory || echo "Directory creation failed, continuing..."
-# update_webui_forge  # Commented out - Forge is already included in Docker image
+install_forge_webui || echo "Forge installation failed!"
+update_webui_forge || echo "Forge update check failed, continuing..."
 start_forge_webui || echo "Forge startup failed!"
 start_jupyter || echo "Jupyter startup failed!"
 run_workspace_setup || echo "Workspace setup failed, continuing..."
