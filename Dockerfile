@@ -1,19 +1,13 @@
 FROM nvidia/cuda:12.4.1-base-ubuntu22.04 AS base
 
-# Set Python Version
 ARG PYTHON_VERSION="3.11"
 ARG CONTAINER_TIMEZONE=UTC 
 
-# Prevents prompts from packages asking for user input during installation
 ENV DEBIAN_FRONTEND=noninteractive
-# Prefer binary wheels over source distributions for faster pip installations
 ENV PIP_PREFER_BINARY=1
-# Ensures output from python is printed immediately to the terminal without buffering
 ENV PYTHONUNBUFFERED=1 
-# Speed up some cmake builds
 ENV CMAKE_BUILD_PARALLEL_LEVEL=8
 
-# Install Python, git and other necessary tools
 RUN ln -snf /usr/share/zoneinfo/$CONTAINER_TIMEZONE /etc/localtime && echo $CONTAINER_TIMEZONE > /etc/timezone
 RUN apt-get update --yes && \
     apt-get install --yes --no-install-recommends build-essential aria2 git git-lfs curl wget gcc g++ bash libgl1 software-properties-common && \
@@ -25,23 +19,18 @@ RUN apt-get update --yes && \
     rm -rf /var/lib/apt/lists/* && \
     echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 
-# Set up Python and pip
 RUN ln -s /usr/bin/python${PYTHON_VERSION} /usr/bin/python && \
     rm /usr/bin/python3 && \
     ln -s /usr/bin/python${PYTHON_VERSION} /usr/bin/python3 && \
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
     python get-pip.py
 
-# Clean up to reduce image size
 RUN apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-# Install Torch 
 RUN pip install --no-cache-dir torch==2.4.1 torchvision==0.19.1 --index-url https://download.pytorch.org/whl/cu124
 
-# Install xformers
 RUN pip install --no-cache-dir xformers==0.0.28.post1 --index-url https://download.pytorch.org/whl/cu124
 
-# Install Jupyter Lab and utilities
 RUN pip install --no-cache-dir jupyterlab jupyter-archive nbformat \
     jupyterlab-git ipywidgets ipykernel ipython pickleshare \
     requests python-dotenv nvitop gdown && \
@@ -50,7 +39,6 @@ RUN pip install --no-cache-dir jupyterlab jupyter-archive nbformat \
 WORKDIR /workspace/
 
 COPY start.sh .
-COPY src/ ./src/
 
 RUN chmod +x start.sh
 

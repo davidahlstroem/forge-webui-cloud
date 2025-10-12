@@ -1,6 +1,10 @@
 #!/bin/bash
-export BRANCH_ID=${BRANCH_ID:-main}
-export PLATFORM_ID="RUNPOD"
+
+# Remove old start.sh from volume if it exists (prevents conflicts)
+if [ -f "/workspace/start.sh" ] && [ "$0" != "/workspace/start.sh" ]; then
+    echo "Removing old start.sh from volume..."
+    rm -f /workspace/start.sh
+fi
 
 configure_dns() {
     echo "Configuring DNS settings..."
@@ -36,7 +40,7 @@ start_jupyter() {
 # Export env vars
 export_env_vars() {
     echo "Exporting environment variables..."
-    printenv | grep -E '^RUNPOD_|^PATH=|^_=' | awk -F = '{ print "export " $1 "=\"" $2 "\"" }' >>/etc/rp_environment 2>/dev/null || true
+    printenv | awk -F = '{ print "export " $1 "=\"" $2 "\"" }' >>/etc/rp_environment 2>/dev/null || true
     echo 'source /etc/rp_environment' >>~/.bashrc 2>/dev/null || true
     echo "Environment variables exported."
 }
@@ -70,11 +74,10 @@ update_webui_forge() {
 
 start_forge_webui() {
     echo "Starting Forge WebUI Neo..."
-    echo "This may take 5-10 minutes on first startup (installing dependencies)..."
     cd /workspace/stable-diffusion-webui-forge
     # Forge Neo's launch.py handles dependency installation automatically
     python3 launch.py --listen --port 7860 --api --skip-torch-cuda-test --xformers &>/workspace/forge.log &
-    echo "Forge WebUI started (initializing in background, check forge.log for progress)"
+    echo "Forge WebUI started (initializing in background, trail forge.log for progress)"
 }
 
 run_workspace_setup() {
@@ -82,17 +85,13 @@ run_workspace_setup() {
         echo "Found /workspace/setup.sh, executing..."
         chmod +x /workspace/setup.sh
         cd /workspace
-        if bash /workspace/setup.sh; then
-            echo "Workspace setup completed successfully!"
-        fi
+        bash /workspace/setup.sh
     else
-        echo "No setup script found at /workspace/setup.sh"
+        echo "No setup script found at /workspace/setup.sh (skipping...)"
     fi
 }
 
 echo "=== Pod Starting ==="
-echo "Platform: $PLATFORM_ID"
-echo "Branch: $BRANCH_ID"
 configure_dns || echo "DNS config failed, continuing..."
 export_env_vars || echo "Env vars export failed, continuing..."
 make_directory || echo "Directory creation failed, continuing..."

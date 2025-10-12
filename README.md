@@ -4,14 +4,14 @@ Docker image for **Stable Diffusion WebUI Forge Neo** optimized for GPU cloud pl
 
 **Docker Hub:** `davidahlstroem/forge-webui-cloud:latest`
 
-**Forge Neo** is an actively maintained fork with optimizations, PyTorch 2.8.0, and support for latest models (Flux Kontext, Wan 2.2, Qwen-Image, etc.).
+**Forge Neo** is an actively maintained fork with optimizations and support for latest models (Flux Kontext, Wan 2.2, Qwen-Image, etc).
 
 The container automatically starts all services when deployed to GPU cloud platforms
 
 ## What's Included
 
 - **CUDA 12.4.1** base (Ubuntu 22.04)
-- **Python 3.10** with pip
+- **Python 3.11** with pip
 - **PyTorch 2.4.1** + torchvision (CUDA 12.4 optimized)
 - **xFormers 0.0.28** for memory efficiency
 - **Jupyter Lab** with extensions
@@ -34,8 +34,8 @@ The container automatically starts all services when deployed to GPU cloud platf
 ## Directory Structure
 
 ```
-/workspace/                                    # Network volume (persistent)
-├── stable-diffusion-webui-forge/            # Forge WebUI installation
+/workspace/                                   # Network volume (persistent)
+├── stable-diffusion-webui-forge/             # Forge WebUI installation
 ├── models/                                   # Model storage
 │   ├── checkpoints/
 │   ├── loras/
@@ -72,11 +72,6 @@ echo "Custom setup complete!"
 - **7860** - Stable Diffusion WebUI Forge (web interface + API)
 - **8888** - Jupyter Lab (no authentication)
 
-## Environment Variables
-
-- `BRANCH_ID` - Custom script branch (default: `main`)
-- `PLATFORM_ID` - Platform identifier (default: `RUNPOD`)
-
 ## Troubleshooting
 
 ### Check Logs
@@ -87,7 +82,7 @@ cat /workspace/jupyter.log      # Jupyter logs
 ```
 
 ### First Startup Taking Long?
-- First run installs Forge (~5-10 min for dependencies)
+- First run installs Forge (~10-15 min for dependencies)
 - Compiling CUDA kernels on first GPU use (~2-3 min)
 - Subsequent starts are much faster with network volume
 
