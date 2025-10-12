@@ -13,9 +13,6 @@ ENV PYTHONUNBUFFERED=1
 # Speed up some cmake builds
 ENV CMAKE_BUILD_PARALLEL_LEVEL=8
 
-# create notebooks dir
-RUN mkdir -p /notebooks
-
 # Install Python, git and other necessary tools
 RUN ln -snf /usr/share/zoneinfo/$CONTAINER_TIMEZONE /etc/localtime && echo $CONTAINER_TIMEZONE > /etc/timezone
 RUN apt-get update --yes && \
@@ -44,13 +41,13 @@ RUN pip install --no-cache-dir torch==2.4.1 torchvision==0.19.1 --index-url http
 # Install xformers
 RUN pip install --no-cache-dir xformers==0.0.28.post1 --index-url https://download.pytorch.org/whl/cu124
 
-# Install notebooks requirements
+# Install Jupyter Lab and utilities
 RUN pip install --no-cache-dir jupyterlab jupyter-archive nbformat \
     jupyterlab-git ipywidgets ipykernel ipython pickleshare \
     requests python-dotenv nvitop gdown && \
     pip cache purge
 
-WORKDIR /notebooks/
+WORKDIR /workspace/
 
 COPY start.sh .
 COPY src/ ./src/
@@ -58,4 +55,4 @@ COPY src/ ./src/
 RUN chmod +x start.sh
 
 EXPOSE 7860 8888
-CMD ["/bin/bash", "/notebooks/start.sh"]
+CMD ["/bin/bash", "/workspace/start.sh"]

@@ -13,11 +13,12 @@ nameserver 8.8.4.4" > /etc/resolv.conf 2>/dev/null || echo "Could not modify DNS
 # Start jupyter lab
 start_jupyter() {
     echo "Starting Jupyter Lab..."
-    cd /notebooks/
+    cd /workspace/
     jupyter lab \
         --allow-root \
         --ip=0.0.0.0 \
         --no-browser \
+        --ServerApp.root_dir=/workspace \
         --ServerApp.trust_xheaders=True \
         --ServerApp.disable_check_xsrf=False \
         --ServerApp.allow_remote_access=True \
@@ -25,12 +26,11 @@ start_jupyter() {
         --ServerApp.allow_credentials=True \
         --FileContentsManager.delete_to_trash=False \
         --FileContentsManager.always_delete_dir=True \
-        --FileContentsManager.preferred_dir=/notebooks \
         --ContentsManager.allow_hidden=True \
         --LabServerApp.copy_absolute_path=True \
         --ServerApp.token='' \
         --ServerApp.password='' &>./jupyter.log &
-    echo "Jupyter Lab started"
+    echo "Jupyter Lab started from /workspace"
 }
 
 # Export env vars
@@ -49,12 +49,11 @@ make_directory() {
 
 install_forge_webui() {
     if [ ! -d "/workspace/stable-diffusion-webui-forge" ]; then
-        echo "Forge WebUI not found, installing to /workspace..."
+        echo "Forge WebUI Neo not found, installing to /workspace..."
         cd /workspace
-        git clone --depth 1 https://github.com/lllyasviel/stable-diffusion-webui-forge.git
-        cd stable-diffusion-webui-forge
-        pip install --no-cache-dir -r requirements_versions.txt
-        echo "Forge WebUI installed successfully"
+        git clone --depth 1 https://github.com/Haoming02/sd-webui-forge-classic.git --branch neo stable-diffusion-webui-forge
+        echo "Forge WebUI Neo cloned successfully"
+        echo "Dependencies will be installed on first launch"
     else
         echo "Forge WebUI already installed at /workspace/stable-diffusion-webui-forge"
     fi
@@ -70,10 +69,11 @@ update_webui_forge() {
 }
 
 start_forge_webui() {
-    echo "Starting Forge WebUI..."
-    echo "This may take 5-10 minutes on first startup..."
+    echo "Starting Forge WebUI Neo..."
+    echo "This may take 5-10 minutes on first startup (installing dependencies)..."
     cd /workspace/stable-diffusion-webui-forge
-    python3 launch.py --listen --port 7860 --api --skip-torch-cuda-test --xformers &>/notebooks/forge.log &
+    # Forge Neo's launch.py handles dependency installation automatically
+    python3 launch.py --listen --port 7860 --api --skip-torch-cuda-test --xformers &>/workspace/forge.log &
     echo "Forge WebUI started (initializing in background, check forge.log for progress)"
 }
 

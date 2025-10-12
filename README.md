@@ -1,8 +1,10 @@
-# Stable Diffusion WebUI Forge - GPU Cloud Docker
+# Stable Diffusion WebUI Forge Neo - GPU Cloud Docker
 
-Docker image for **Stable Diffusion WebUI Forge** optimized for GPU cloud platforms (RunPod, Vast.ai) with network volume support.
+Docker image for **Stable Diffusion WebUI Forge Neo** optimized for GPU cloud platforms (RunPod, Vast.ai) with network volume support.
 
 **Docker Hub:** `davidahlstroem/forge-webui-cloud:latest`
+
+**Forge Neo** is an actively maintained fork with optimizations, PyTorch 2.8.0, and support for latest models (Flux Kontext, Wan 2.2, Qwen-Image, etc.).
 
 The container automatically starts all services when deployed to GPU cloud platforms
 
@@ -18,7 +20,7 @@ The container automatically starts all services when deployed to GPU cloud platf
 ## How It Works
 
 ### First Run (~10-15 minutes)
-- Installs **Stable Diffusion WebUI Forge** to `/workspace/stable-diffusion-webui-forge`
+- Installs **Stable Diffusion WebUI Forge Neo** to `/workspace/stable-diffusion-webui-forge`
 - Installs all Forge dependencies
 - Creates model directories in `/workspace/models/`
 - Starts Forge WebUI on port 7860 (with API enabled)
@@ -39,12 +41,10 @@ The container automatically starts all services when deployed to GPU cloud platf
 │   ├── loras/
 │   ├── vae/
 │   └── ...
-└── setup.sh                                  # Optional custom setup script
-
-/notebooks/                                   # Container storage
-├── forge.log                                # Forge startup logs
-├── jupyter.log                              # Jupyter logs
-└── start.sh                                 # Main startup script
+├── setup.sh                                  # Optional custom setup script
+├── start.sh                                  # Main startup script (from image)
+├── forge.log                                 # Forge startup/runtime logs
+└── jupyter.log                               # Jupyter logs
 ```
 
 ## Custom Setup Script
@@ -82,8 +82,8 @@ echo "Custom setup complete!"
 ### Check Logs
 ```bash
 # In terminal or Jupyter
-cat /notebooks/forge.log        # Forge startup/runtime logs
-cat /notebooks/jupyter.log      # Jupyter logs
+cat /workspace/forge.log        # Forge startup/runtime logs
+cat /workspace/jupyter.log      # Jupyter logs
 ```
 
 ### First Startup Taking Long?
@@ -97,7 +97,7 @@ cat /notebooks/jupyter.log      # Jupyter logs
 - GPU must support CUDA 12.4
 
 ### Forge Won't Start?
-- Check `/notebooks/forge.log` for errors
+- Check `/workspace/forge.log` for errors
 - Verify GPU is detected: `nvidia-smi`
 - Try accessing Jupyter (port 8888) first to debug
 
@@ -106,6 +106,8 @@ cat /notebooks/jupyter.log      # Jupyter logs
 
 **Base Image:** `nvidia/cuda:12.4.1-base-ubuntu22.04`  
 **Image Size:** ~3.5GB (compressed)  
+**Forge Version:** Neo (actively maintained fork)  
+**Forge Repo:** [sd-webui-forge-classic/neo](https://github.com/Haoming02/sd-webui-forge-classic/tree/neo)  
 **Forge Install:** Runtime (first boot only)  
 **Auto-publishes:** Every push to master branch via GitHub Actions
 
