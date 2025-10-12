@@ -12,8 +12,8 @@ The container automatically starts all services when deployed to GPU cloud platf
 
 - **CUDA 12.4.1** base (Ubuntu 22.04)
 - **Python 3.11** with pip
-- **PyTorch 2.4.1** + torchvision (CUDA 12.4 optimized)
-- **xFormers 0.0.28** for memory efficiency
+- **PyTorch 2.5.1** + torchvision (CUDA 12.4 optimized)
+- **xFormers 0.0.28.post3** for memory efficiency
 - **Jupyter Lab** with extensions
 - **Git, curl, wget** and build tools
 
