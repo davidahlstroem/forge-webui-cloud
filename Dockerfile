@@ -1,7 +1,7 @@
 FROM nvidia/cuda:12.4.1-base-ubuntu22.04 AS base
 
 # Set Python Version
-ARG PYTHON_VERSION="3.10"
+ARG PYTHON_VERSION="3.11"
 ARG CONTAINER_TIMEZONE=UTC 
 
 # Prevents prompts from packages asking for user input during installation
