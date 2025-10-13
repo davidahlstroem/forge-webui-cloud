@@ -33,7 +33,8 @@ RUN pip install --no-cache-dir xformers==0.0.28.post3 --index-url https://downlo
 
 RUN pip install --no-cache-dir jupyterlab jupyter-archive nbformat \
     jupyterlab-git ipywidgets ipykernel ipython pickleshare \
-    requests python-dotenv nvitop gdown && \
+    requests python-dotenv nvitop gdown \
+    anyio>=4.0.0 httpcore>=1.0.0 httpx>=1.0.0 && \
     pip cache purge
 
 COPY start.sh /start.sh
@@ -42,4 +43,4 @@ RUN chmod +x /start.sh
 WORKDIR /workspace/
 
 EXPOSE 7860 8888
-CMD ["/bin/bash", "/start.sh"]
+ENTRYPOINT ["/bin/bash", "/start.sh"]

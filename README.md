@@ -34,13 +34,8 @@ The container automatically starts all services when deployed to GPU cloud platf
 ## Directory Structure
 
 ```
-/workspace/                                   # Network volume (persistent)
+/workspace/                                   # Network volume 
 ├── stable-diffusion-webui-forge/             # Forge WebUI installation
-├── models/                                   # Model storage
-│   ├── checkpoints/
-│   ├── loras/
-│   ├── vae/
-│   └── ...
 ├── setup.sh                                  # Optional custom setup script
 ├── start.sh                                  # Main startup script (from image)
 ├── forge.log                                 # Forge startup/runtime logs
@@ -84,7 +79,6 @@ cat /workspace/jupyter.log      # Jupyter logs
 ### First Startup Taking Long?
 - First run installs Forge (~10-15 min for dependencies)
 - Compiling CUDA kernels on first GPU use (~2-3 min)
-- Subsequent starts are much faster with network volume
 
 ### Container Crashes?
 - Ensure `/workspace` is mounted (network volume)
@@ -103,7 +97,7 @@ cat /workspace/jupyter.log      # Jupyter logs
 **Image Size:** ~3.5GB (compressed)  
 **Forge Version:** Neo (actively maintained fork)  
 **Forge Repo:** [sd-webui-forge-classic/neo](https://github.com/Haoming02/sd-webui-forge-classic/tree/neo)  
-**Forge Install:** Runtime (first boot only)  
+**Forge Install:** Runtime
 **Auto-publishes:** Every push to master branch via GitHub Actions
 
 

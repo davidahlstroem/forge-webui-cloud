@@ -17,7 +17,7 @@ nameserver 8.8.4.4" > /etc/resolv.conf 2>/dev/null || echo "Could not modify DNS
 # Start jupyter lab
 start_jupyter() {
     echo "Starting Jupyter Lab..."
-    cd /workspace/
+    cd /workspace
     jupyter lab \
         --allow-root \
         --ip=0.0.0.0 \
@@ -33,7 +33,7 @@ start_jupyter() {
         --ContentsManager.allow_hidden=True \
         --LabServerApp.copy_absolute_path=True \
         --ServerApp.token='' \
-        --ServerApp.password='' &>./jupyter.log &
+        --ServerApp.password='' &>/workspace/jupyter.log &
     echo "Jupyter Lab started from /workspace"
 }
 
@@ -43,12 +43,6 @@ export_env_vars() {
     printenv | awk -F = '{ print "export " $1 "=\"" $2 "\"" }' >>/etc/rp_environment 2>/dev/null || true
     echo 'source /etc/rp_environment' >>~/.bashrc 2>/dev/null || true
     echo "Environment variables exported."
-}
-
-make_directory() {
-    echo "Creating model directories..."
-    mkdir -p /workspace/models/{checkpoints,vae,text-encoder,gfpgan,embeddings,hypernetwork,esrgan,clip,controlnet,loras} || true
-    echo "Directories created."
 }
 
 install_forge_webui() {
@@ -77,7 +71,7 @@ start_forge_webui() {
     cd /workspace/stable-diffusion-webui-forge
     # Forge Neo's launch.py handles dependency installation automatically
     python3 launch.py --listen --port 7860 --api --skip-torch-cuda-test --xformers &>/workspace/forge.log &
-    echo "Forge WebUI started (initializing in background, trail forge.log for progress)"
+    echo "Forge WebUI started (initializing in background, tail forge.log for progress)"
 }
 
 run_workspace_setup() {
@@ -94,7 +88,6 @@ run_workspace_setup() {
 echo "=== Pod Starting ==="
 configure_dns || echo "DNS config failed, continuing..."
 export_env_vars || echo "Env vars export failed, continuing..."
-make_directory || echo "Directory creation failed, continuing..."
 install_forge_webui || echo "Forge installation failed!"
 update_webui_forge || echo "Forge update check failed, continuing..."
 start_forge_webui || echo "Forge startup failed!"
