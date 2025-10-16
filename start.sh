@@ -69,6 +69,8 @@ update_webui_forge() {
 start_forge_webui() {
     echo "Starting Forge WebUI Neo..."
     cd /workspace/stable-diffusion-webui-forge
+    # Force venv location to workspace (persists across restarts)
+    export VENV_DIR="/workspace/stable-diffusion-webui-forge/venv"
     # Forge Neo's launch.py handles dependency installation automatically
     python3 launch.py --listen --port 7860 --api --skip-torch-cuda-test --xformers &>/workspace/forge.log &
     echo "Forge WebUI started (initializing in background, tail forge.log for progress)"
