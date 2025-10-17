@@ -59,8 +59,13 @@ install_forge_webui() {
 
 update_webui_forge() {
     echo "Checking for WebUI Forge updates..."
+    # Skip auto-update to prevent dependency reinstalls
+    # To update manually: cd /workspace/stable-diffusion-webui-forge && git pull
     if [ -d "/workspace/stable-diffusion-webui-forge" ]; then
-        cd /workspace/stable-diffusion-webui-forge && git pull --ff-only || echo "Git pull failed, continuing..."
+        echo "Forge already installed, skipping auto-update (set UPDATE_FORGE=1 to enable)"
+        if [ "$UPDATE_FORGE" = "1" ]; then
+            cd /workspace/stable-diffusion-webui-forge && git pull --ff-only || echo "Git pull failed, continuing..."
+        fi
     fi
     export TORCH_FORCE_WEIGHTS_ONLY_LOAD=1
     echo "WebUI Forge update check completed"
@@ -69,6 +74,8 @@ update_webui_forge() {
 start_forge_webui() {
     echo "Starting Forge WebUI Neo..."
     cd /workspace/stable-diffusion-webui-forge
+    # Force venv to workspace for persistence across restarts
+    export VENV_DIR="/workspace/stable-diffusion-webui-forge/venv"
     # Forge Neo's launch.py handles dependency installation automatically
     python3 launch.py --listen --port 7860 --api --skip-torch-cuda-test --xformers &>/workspace/forge.log &
     echo "Forge WebUI started (initializing in background, tail forge.log for progress)"
