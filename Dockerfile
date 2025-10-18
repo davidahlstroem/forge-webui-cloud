@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.4.1-base-ubuntu22.04 AS base
+FROM nvidia/cuda:12.4.1-runtime-ubuntu22.04 AS base
 
 ARG PYTHON_VERSION="3.11"
 ARG CONTAINER_TIMEZONE=UTC 
@@ -27,10 +27,7 @@ RUN ln -s /usr/bin/python${PYTHON_VERSION} /usr/bin/python && \
 
 RUN apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir torch==2.5.1 torchvision==0.20.1 --index-url https://download.pytorch.org/whl/cu124
-
-RUN pip install --no-cache-dir xformers==0.0.28.post3 --index-url https://download.pytorch.org/whl/cu124
-
+# Only install JupyterLab in the image (PyTorch/xFormers installed at runtime)
 RUN pip install --no-cache-dir jupyterlab jupyter-archive nbformat \
     jupyterlab-git ipywidgets ipykernel ipython pickleshare \
     requests python-dotenv nvitop gdown \

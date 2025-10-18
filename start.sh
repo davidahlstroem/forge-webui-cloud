@@ -45,6 +45,18 @@ export_env_vars() {
     echo "Environment variables exported."
 }
 
+install_pytorch() {
+    # Check if PyTorch is already installed in venv or system
+    if python3 -c "import torch" 2>/dev/null; then
+        echo "PyTorch already installed, skipping..."
+    else
+        echo "Installing PyTorch 2.5.1 + xFormers to system (one-time, ~5 min)..."
+        pip install --no-cache-dir torch==2.5.1 torchvision==0.20.1 --index-url https://download.pytorch.org/whl/cu124
+        pip install --no-cache-dir xformers==0.0.28.post3 --index-url https://download.pytorch.org/whl/cu124
+        echo "PyTorch installation complete"
+    fi
+}
+
 install_forge_webui() {
     if [ ! -d "/workspace/stable-diffusion-webui-forge" ]; then
         echo "Forge WebUI Neo not found, installing to /workspace..."
@@ -95,6 +107,7 @@ run_workspace_setup() {
 echo "=== Pod Starting ==="
 configure_dns || echo "DNS config failed, continuing..."
 export_env_vars || echo "Env vars export failed, continuing..."
+install_pytorch || echo "PyTorch installation failed!"
 install_forge_webui || echo "Forge installation failed!"
 update_webui_forge || echo "Forge update check failed, continuing..."
 start_forge_webui || echo "Forge startup failed!"
