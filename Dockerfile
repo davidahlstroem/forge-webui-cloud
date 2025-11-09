@@ -27,11 +27,9 @@ RUN ln -s /usr/bin/python${PYTHON_VERSION} /usr/bin/python && \
 
 RUN apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-# Only install JupyterLab in the image (PyTorch/xFormers installed at runtime)
-RUN pip install --no-cache-dir jupyterlab jupyter-archive nbformat \
-    jupyterlab-git ipywidgets ipykernel ipython pickleshare \
-    requests python-dotenv nvitop gdown \
-    anyio>=4.0.0 httpcore>=1.0.0 httpx>=1.0.0 && \
+# Install code-server (VS Code in browser)
+RUN curl -fsSL https://code-server.dev/install.sh | sh && \
+    pip install --no-cache-dir requests python-dotenv nvitop gdown && \
     pip cache purge
 
 COPY start.sh /start.sh

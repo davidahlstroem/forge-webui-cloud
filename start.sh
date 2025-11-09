@@ -14,27 +14,17 @@ nameserver 8.8.4.4" > /etc/resolv.conf 2>/dev/null || echo "Could not modify DNS
     echo "DNS configuration completed."
 }
 
-# Start jupyter lab
-start_jupyter() {
-    echo "Starting Jupyter Lab..."
+# Start VS Code Server
+start_vscode() {
+    echo "Starting VS Code Server..."
     cd /workspace
-    jupyter lab \
-        --allow-root \
-        --ip=0.0.0.0 \
-        --no-browser \
-        --ServerApp.root_dir=/workspace \
-        --ServerApp.trust_xheaders=True \
-        --ServerApp.disable_check_xsrf=False \
-        --ServerApp.allow_remote_access=True \
-        --ServerApp.allow_origin='*' \
-        --ServerApp.allow_credentials=True \
-        --FileContentsManager.delete_to_trash=False \
-        --FileContentsManager.always_delete_dir=True \
-        --ContentsManager.allow_hidden=True \
-        --LabServerApp.copy_absolute_path=True \
-        --ServerApp.token='' \
-        --ServerApp.password='' &>/workspace/jupyter.log &
-    echo "Jupyter Lab started from /workspace"
+    code-server \
+        --bind-addr 0.0.0.0:8888 \
+        --auth none \
+        --disable-telemetry \
+        --disable-update-check \
+        /workspace &>/workspace/vscode.log &
+    echo "VS Code Server started at port 8888"
 }
 
 # Export env vars
@@ -111,7 +101,7 @@ install_pytorch || echo "PyTorch installation failed!"
 install_forge_webui || echo "Forge installation failed!"
 update_webui_forge || echo "Forge update check failed, continuing..."
 start_forge_webui || echo "Forge startup failed!"
-start_jupyter || echo "Jupyter startup failed!"
+start_vscode || echo "VS Code Server startup failed!"
 run_workspace_setup || echo "Workspace setup failed, continuing..."
 echo "=== Start script finished, pod is ready ==="
 sleep infinity
